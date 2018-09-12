@@ -1,0 +1,45 @@
+package com.gyx.hdfs.inputformat;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+
+import java.io.IOException;
+
+/**
+ * @author 郭一行
+ * @date 2018-09-10 15:35
+ * @since 1.0.0
+ */
+public class SequenceFileDriver {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+        //获取配置信息
+        Configuration conf=new Configuration();
+        Job job = Job.getInstance(conf);
+        //设置jar包加载路径
+        job.setJarByClass(SequenceFileDriver.class);
+        //加载map/reduce类
+        job.setMapperClass(SequenceFileMapper.class);
+        job.setReducerClass(SequenceFileReducer.class);
+        //设置InputFormat和OutFormat
+        job.setInputFormatClass(WholeFileInputformat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+        //设置map输出数据key和value类型
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(BytesWritable.class);
+        //设置最终输出数据key和value类型
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(BytesWritable.class);
+        //设置输入数据和输出数据路径
+        FileInputFormat.setInputPaths(job,new Path(args[0]));
+        FileOutputFormat.setOutputPath(job,new Path(args[1]));
+        //提交
+        boolean result = job.waitForCompletion(true);
+        System.exit(result?0:1);
+    }
+}
